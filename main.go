@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	mh, err := MatchHistory(SERVER_EUW, os.Args[1])
+	mh, err := MatchHistory(os.Args[1])
 	if err != nil {
 		log.Fatalf("Could not get match history: %s", err)
 	}

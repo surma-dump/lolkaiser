@@ -52,8 +52,14 @@ var Extractors = map[string]FieldExtractor{
 	},
 	"gold": func(s *goquery.Selection) interface{} {
 		node := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(5) > div:nth-child(1) > strong")
-		v, _ := strconv.ParseInt(strings.TrimSpace(node.Text()), 10, 64)
-		return int(v)
+		textVal := strings.TrimSpace(node.Text())
+		multiplier := 1.0
+		if strings.HasSuffix(textVal, "k") {
+			multiplier = 1000.0
+			textVal = textVal[0 : len(textVal)-1]
+		}
+		v, _ := strconv.ParseFloat(textVal, 64)
+		return int(v * multiplier)
 	},
 	"minions": func(s *goquery.Selection) interface{} {
 		node := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(6) > div:nth-child(1) > strong")
@@ -110,10 +116,6 @@ func (s LoLServer) String() string {
 	return string(s)
 }
 
-const (
-	SERVER_EUW LoLServer = "euw"
-)
-
 type Match struct {
 	GameType string     `json:"game_type" lolkaiser:"game_type"`
 	Date     time.Time  `json:"timestamp" lolkaiser:"timestamp"`
@@ -142,8 +144,8 @@ func PlayerFromString(s string) Player {
 	}
 }
 
-func MatchHistory(server LoLServer, id string) ([]*Match, error) {
-	url := "http://" + path.Join(baseUrl, server.String(), id)
+func MatchHistory(id string) ([]*Match, error) {
+	url := "http://" + path.Join(baseUrl, id)
 	doc, err := goquery.NewDocument(url)
 	if err != nil {
 		return nil, fmt.Errorf("Could not get summoner document: %s", err)
