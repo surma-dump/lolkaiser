@@ -136,14 +136,6 @@ type Player struct {
 	SummonerName string `json:"summoner_name"`
 }
 
-func PlayerFromString(s string) Player {
-	e := strings.Split(s, ":")
-	return Player{
-		Champion:     e[0],
-		SummonerName: e[1],
-	}
-}
-
 func MatchHistory(id string) ([]*Match, error) {
 	url := "http://" + path.Join(baseUrl, id)
 	doc, err := goquery.NewDocument(url)
