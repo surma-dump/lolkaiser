@@ -34,8 +34,9 @@ func main() {
 		json.NewEncoder(w).Encode(mh)
 	})
 
-	log.Printf("Starting webserver...")
-	err := http.ListenAndServe(fmt.Sprintf("localhost:%d", options.Port), r)
+	addr := fmt.Sprintf("0.0.0.0:%d", options.Port)
+	log.Printf("Starting webserver on %s...", addr)
+	err := http.ListenAndServe(addr, r)
 	if err != nil {
 		log.Fatalf("Could not start webserver: %s", err)
 	}
