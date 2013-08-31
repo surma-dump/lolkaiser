@@ -13,8 +13,8 @@ import (
 
 var (
 	options = struct {
-		Port int           `goptions: -p, --port, description='Port to bind webserver to'`
-		Help goptions.Help `goptions: -h, --help, description='Show this help'`
+		Port int           `goptions:"-p, --port, description='Port to bind webserver to'"`
+		Help goptions.Help `goptions:"-h, --help, description='Show this help'"`
 	}{
 		Port: 5000,
 	}
