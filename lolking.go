@@ -136,7 +136,7 @@ type Player struct {
 	SummonerName string `json:"summoner_name"`
 }
 
-func MatchHistory(id string) ([]*Match, error) {
+func LolKingMatchHistory(id string) ([]*Match, error) {
 	url := "http://" + path.Join(baseUrl, id)
 	doc, err := goquery.NewDocument(url)
 	if err != nil {

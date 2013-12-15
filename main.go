@@ -26,7 +26,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{server}/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		mh, err := MatchHistory(path.Join(vars["server"], vars["id"]))
+		mh, err := LolKingMatchHistory(path.Join(vars["server"], vars["id"]))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
