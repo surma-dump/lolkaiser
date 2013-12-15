@@ -1,1 +1,1 @@
-web: lolkaiser -p $PORT
+web: lolkaiser -p $PORT --apikey $APIKEY --redis $REDISTOGO_URL
