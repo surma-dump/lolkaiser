@@ -20,6 +20,26 @@ var (
 	}
 )
 
+type Match struct {
+	GameType string     `json:"game_type" lolkaiser:"game_type"`
+	Date     time.Time  `json:"timestamp" lolkaiser:"timestamp"`
+	Win      bool       `json:"win" lolkaiser:"win"`
+	Length   int        `json:"length" lolkaiser:"length"`
+	Teams    [][]Player `json:"teams" lolkaiser:"teams"`
+
+	Champion         string `json:"champion" lolkaiser:"champion"`
+	KDA              []int  `json:"kda" lolkaiser:"kda"`
+	Gold             int    `json:"gold" lolkaiser:"gold"`
+	Minions          int    `json:"minions" lolkaiser:"minions"`
+	LargestMultikill int    `json:"largest_multikill" lolkaiser:"largest_multikill"`
+	TimeDead         int    `json:"time_dead" lolkaiser:"time_dead"`
+}
+
+type Player struct {
+	Champion     string `json:"champion"`
+	SummonerName string `json:"summoner_name"`
+}
+
 func main() {
 	goptions.ParseAndFail(&options)
 
