@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"path"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 var (
 	options = struct {
 		Port      int           `goptions:"-p, --port, description='Port to bind webserver to'"`
-		RedisAddr string        `goptions:"--redis, description='URL of Redis', obligatory"`
+		RedisAddr *url.URL      `goptions:"--redis, description='URL of Redis', obligatory"`
 		APIKey    string        `goptions:"--apikey, description='API key for Riot API'"`
 		Help      goptions.Help `goptions:"-h, --help, description='Show this help'"`
 	}{
@@ -55,9 +56,14 @@ func main() {
 
 	goriot.SetAPIKey(options.APIKey)
 	var err error
-	db, err = redis.Dial("tcp4", options.RedisAddr)
+	db, err = redis.Dial("tcp4", options.RedisAddr.Host)
 	if err != nil {
 		log.Fatalf("Could not connect to redis: %s", err)
+	}
+
+	if options.RedisAddr.User != nil {
+		pw, _ := options.RedisAddr.User.Password()
+		db.Do("AUTH", pw)
 	}
 
 	r := mux.NewRouter()
