@@ -110,41 +110,7 @@ func extractChampion(s *goquery.Selection) string {
 	return elems[len(elems)-1]
 }
 
-type LoLServer string
-
-func (s LoLServer) String() string {
-	return string(s)
-}
-
-type Match struct {
-	GameType string     `json:"game_type" lolkaiser:"game_type"`
-	Date     time.Time  `json:"timestamp" lolkaiser:"timestamp"`
-	Win      bool       `json:"win" lolkaiser:"win"`
-	Length   int        `json:"length" lolkaiser:"length"`
-	Teams    [][]Player `json:"teams" lolkaiser:"teams"`
-
-	Champion         string `json:"champion" lolkaiser:"champion"`
-	KDA              []int  `json:"kda" lolkaiser:"kda"`
-	Gold             int    `json:"gold" lolkaiser:"gold"`
-	Minions          int    `json:"minions" lolkaiser:"minions"`
-	LargestMultikill int    `json:"largest_multikill" lolkaiser:"largest_multikill"`
-	TimeDead         int    `json:"time_dead" lolkaiser:"time_dead"`
-}
-
-type Player struct {
-	Champion     string `json:"champion"`
-	SummonerName string `json:"summoner_name"`
-}
-
-func PlayerFromString(s string) Player {
-	e := strings.Split(s, ":")
-	return Player{
-		Champion:     e[0],
-		SummonerName: e[1],
-	}
-}
-
-func MatchHistory(id string) ([]*Match, error) {
+func LolKingMatchHistory(id string) ([]*Match, error) {
 	url := "http://" + path.Join(baseUrl, id)
 	doc, err := goquery.NewDocument(url)
 	if err != nil {
@@ -152,7 +118,7 @@ func MatchHistory(id string) ([]*Match, error) {
 	}
 
 	r := make([]*Match, 0)
-	sel := doc.Find(".pane_inner > .match_loss, .pane_inner > .match_win")
+	sel := doc.Find(".match_loss, .match_win")
 	sel.Each(func(_ int, s *goquery.Selection) {
 		r = append(r, ConvertMatch(s))
 	})
