@@ -13,4 +13,4 @@ then you can get that person’s match history in JSON format from
     http://<lolkaiser URL>/euw/44256822
 
 ---
-Version 1.0.0
+Version 1.0.1
