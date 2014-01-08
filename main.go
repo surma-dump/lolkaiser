@@ -12,14 +12,13 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/voxelbrain/goptions"
 
-	"github.com/TrevorSStone/goriot"
 	"github.com/garyburd/redigo/redis"
 )
 
 var (
 	options = struct {
 		Port      int           `goptions:"-p, --port, description='Port to bind webserver to'"`
-		RedisAddr *url.URL      `goptions:"--redis, description='URL of Redis', obligatory"`
+		RedisAddr *url.URL      `goptions:"--redis, description='URL of Redis'"`
 		APIKey    string        `goptions:"--apikey, description='API key for Riot API'"`
 		Help      goptions.Help `goptions:"-h, --help, description='Show this help'"`
 	}{
@@ -54,22 +53,10 @@ var (
 func main() {
 	goptions.ParseAndFail(&options)
 
-	goriot.SetAPIKey(options.APIKey)
-	var err error
-	db, err = redis.Dial("tcp4", options.RedisAddr.Host)
-	if err != nil {
-		log.Fatalf("Could not connect to redis: %s", err)
-	}
-
-	if options.RedisAddr.User != nil {
-		pw, _ := options.RedisAddr.User.Password()
-		db.Do("AUTH", pw)
-	}
-
 	r := mux.NewRouter()
 	r.HandleFunc("/{server}/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		mh, err := GoRiotMatchHistory(path.Join(vars["server"], vars["id"]))
+		mh, err := LolKingMatchHistory(path.Join(vars["server"], vars["id"]))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -79,7 +66,7 @@ func main() {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", options.Port)
 	log.Printf("Starting webserver on %s...", addr)
-	err = http.ListenAndServe(addr, r)
+  err := http.ListenAndServe(addr, r)
 	if err != nil {
 		log.Fatalf("Could not start webserver: %s", err)
 	}

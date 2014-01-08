@@ -118,7 +118,7 @@ func LolKingMatchHistory(id string) ([]*Match, error) {
 	}
 
 	r := make([]*Match, 0)
-	sel := doc.Find(".pane_inner > .match_loss, .pane_inner > .match_win")
+	sel := doc.Find(".match_loss, .match_win")
 	sel.Each(func(_ int, s *goquery.Selection) {
 		r = append(r, ConvertMatch(s))
 	})

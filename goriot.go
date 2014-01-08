@@ -18,7 +18,7 @@ func GoRiotMatchHistory(sid string) ([]*Match, error) {
 		return nil, err
 	}
 
-	games, err := goriot.GetRecentGameBySummoner(elems[0], id)
+	games, err := goriot.RecentGameBySummoner(elems[0], id)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func lookupChampion(id int) string {
 	if err == nil {
 		return s
 	}
-	champions, err := goriot.GetChampionList(goriot.NA, false)
+	champions, err := goriot.ChampionList(goriot.NA, false)
 	if err != nil {
 		log.Printf("Could not resolve champion ID: %s", err)
 		return ""
@@ -99,7 +99,7 @@ func lookupSummonerName(region string, id int) string {
 		return s
 	}
 
-	summoner, err := goriot.GetSummonerByID(region, int64(id))
+	summoner, err := goriot.SummonerByID(region, int64(id))
 	if err != nil {
 		log.Printf("Could not resolve summoner ID: %s", err)
 		return ""
