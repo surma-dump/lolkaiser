@@ -10,14 +10,20 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/voxelbrain/goptions"
+
+	"labix.org/v2/mgo"
 )
 
 var (
 	options = struct {
-		Port int           `goptions:"-p, --port, description='Port to bind webserver to'"`
-		Help goptions.Help `goptions:"-h, --help, description='Show this help'"`
+		Port              int           `goptions:"-p, --port, description='Port to bind webserver to'"`
+		MongoDB           string        `goptions:"-m, --mongodb, description='URL of MongoDB', obligatory"`
+		StaticContent     string        `goptions:"--static, description='Path to static content folder'"`
+		SummonerWhitelist string        `goptions:"--whitelist, description='List of whitelisted summoner IDs separated by colon'"`
+		Help              goptions.Help `goptions:"-h, --help, description='Show this help'"`
 	}{
-		Port: 5000,
+		Port:          5000,
+		StaticContent: "static",
 	}
 )
 
@@ -44,8 +50,15 @@ type Player struct {
 func main() {
 	goptions.ParseAndFail(&options)
 
+	session, err := mgo.Dial(options.MongoDB)
+	if err != nil {
+		log.Fatalf("Could not connect to MongoDB: %s", err)
+	}
+	db := session.DB("")
+	_ = db
+
 	r := mux.NewRouter()
-	r.HandleFunc("/{server}/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/{server:euw|na}/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		mh, err := LolKingMatchHistory(path.Join(vars["server"], vars["id"]))
 		if err != nil {
@@ -54,11 +67,11 @@ func main() {
 		}
 		json.NewEncoder(w).Encode(mh)
 	})
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir(options.StaticContent)))
 
 	addr := fmt.Sprintf("0.0.0.0:%d", options.Port)
 	log.Printf("Starting webserver on %s...", addr)
-	err := http.ListenAndServe(addr, r)
-	if err != nil {
+	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatalf("Could not start webserver: %s", err)
 	}
 }
