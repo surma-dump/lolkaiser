@@ -5,22 +5,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"path"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/voxelbrain/goptions"
-
-	"github.com/garyburd/redigo/redis"
 )
 
 var (
 	options = struct {
-		Port      int           `goptions:"-p, --port, description='Port to bind webserver to'"`
-		RedisAddr *url.URL      `goptions:"--redis, description='URL of Redis'"`
-		APIKey    string        `goptions:"--apikey, description='API key for Riot API'"`
-		Help      goptions.Help `goptions:"-h, --help, description='Show this help'"`
+		Port int           `goptions:"-p, --port, description='Port to bind webserver to'"`
+		Help goptions.Help `goptions:"-h, --help, description='Show this help'"`
 	}{
 		Port: 5000,
 	}
@@ -46,10 +41,6 @@ type Player struct {
 	SummonerName string `json:"summoner_name"`
 }
 
-var (
-	db redis.Conn
-)
-
 func main() {
 	goptions.ParseAndFail(&options)
 
@@ -66,7 +57,7 @@ func main() {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", options.Port)
 	log.Printf("Starting webserver on %s...", addr)
-  err := http.ListenAndServe(addr, r)
+	err := http.ListenAndServe(addr, r)
 	if err != nil {
 		log.Fatalf("Could not start webserver: %s", err)
 	}
