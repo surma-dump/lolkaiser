@@ -6,10 +6,11 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/voxelbrain/goptions"
+	"gopkg.in/surma/v1.2.1/httptools"
 
 	"labix.org/v2/mgo"
 )
@@ -57,21 +58,42 @@ func main() {
 	db := session.DB("")
 	_ = db
 
-	r := mux.NewRouter()
-	r.HandleFunc("/{server:euw|na}/{id}", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		mh, err := LolKingMatchHistory(path.Join(vars["server"], vars["id"]))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		json.NewEncoder(w).Encode(mh)
+	r := httptools.NewRegexpSwitch(map[string]http.Handler{
+		"/update/(euw|na)/([0-9]+)": http.HandlerFunc(updateCollectionHandler),
+		"/.+": http.FileServer(http.Dir(options.StaticContent)),
 	})
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir(options.StaticContent)))
 
 	addr := fmt.Sprintf("0.0.0.0:%d", options.Port)
 	log.Printf("Starting webserver on %s...", addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatalf("Could not start webserver: %s", err)
 	}
+}
+
+func updateCollectionHandler(w http.ResponseWriter, r *http.Request) {
+	vars := w.(httptools.VarsResponseWriter).Vars()
+	server, summonderId := vars["1"].(string), vars["2"].(string)
+
+	if !StringArray(strings.Split(options.SummonerWhitelist, ":")).Contains(server + "/" + summonderId) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	mh, err := LolKingMatchHistory(path.Join(server, summonderId))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	json.NewEncoder(w).Encode(mh)
+}
+
+type StringArray []string
+
+func (sa StringArray) Contains(s string) bool {
+	for _, v := range sa {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }
