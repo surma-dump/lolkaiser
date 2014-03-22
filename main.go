@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"path"
 	"strings"
 	"time"
 
@@ -13,6 +11,7 @@ import (
 	"gopkg.in/surma/v1.2.1/httptools"
 
 	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
 )
 
 var (
@@ -20,7 +19,7 @@ var (
 		Port              int           `goptions:"-p, --port, description='Port to bind webserver to'"`
 		MongoDB           string        `goptions:"-m, --mongodb, description='URL of MongoDB', obligatory"`
 		StaticContent     string        `goptions:"--static, description='Path to static content folder'"`
-		SummonerWhitelist string        `goptions:"--whitelist, description='List of whitelisted summoner IDs separated by colon'"`
+		SummonerWhitelist string        `goptions:"-w, --whitelist, description='List of whitelisted summoner IDs separated by colon'"`
 		Help              goptions.Help `goptions:"-h, --help, description='Show this help'"`
 	}{
 		Port:          5000,
@@ -29,24 +28,28 @@ var (
 )
 
 type Match struct {
-	GameType string     `json:"game_type" lolkaiser:"game_type"`
-	Date     time.Time  `json:"timestamp" lolkaiser:"timestamp"`
-	Win      bool       `json:"win" lolkaiser:"win"`
-	Length   int        `json:"length" lolkaiser:"length"`
-	Teams    [][]Player `json:"teams" lolkaiser:"teams"`
+	GameType string     `json:"game_type" lolkaiser:"game_type" bson:"game_type"`
+	Date     time.Time  `json:"timestamp" lolkaiser:"timestamp" bson:"timestamp"`
+	Win      bool       `json:"win" lolkaiser:"win" bson:"win"`
+	Length   int        `json:"length" lolkaiser:"length" bson:"length"`
+	Teams    [][]Player `json:"teams" lolkaiser:"teams" bson:"teams"`
 
-	Champion         string `json:"champion" lolkaiser:"champion"`
-	KDA              []int  `json:"kda" lolkaiser:"kda"`
-	Gold             int    `json:"gold" lolkaiser:"gold"`
-	Minions          int    `json:"minions" lolkaiser:"minions"`
-	LargestMultikill int    `json:"largest_multikill" lolkaiser:"largest_multikill"`
-	TimeDead         int    `json:"time_dead" lolkaiser:"time_dead"`
+	Champion         string `json:"champion" lolkaiser:"champion" bson:"champion"`
+	KDA              []int  `json:"kda" lolkaiser:"kda" bson:"kda"`
+	Gold             int    `json:"gold" lolkaiser:"gold" bson:"gold"`
+	Minions          int    `json:"minions" lolkaiser:"minions" bson:"minions"`
+	LargestMultikill int    `json:"largest_multikill" lolkaiser:"largest_multikill" bson:"largest_multikill"`
+	TimeDead         int    `json:"time_dead" lolkaiser:"time_dead" bson:"time_dead"`
 }
 
 type Player struct {
-	Champion     string `json:"champion"`
-	SummonerName string `json:"summoner_name"`
+	Champion     string `json:"champion" bson:"champion"`
+	SummonerName string `json:"summoner_name" bson:"summoner_name"`
 }
+
+var (
+	db *mgo.Database
+)
 
 func main() {
 	goptions.ParseAndFail(&options)
@@ -55,8 +58,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not connect to MongoDB: %s", err)
 	}
-	db := session.DB("")
-	_ = db
+	db = session.DB("")
 
 	r := httptools.NewRegexpSwitch(map[string]http.Handler{
 		"/update/(euw|na)/([0-9]+)": http.HandlerFunc(updateCollectionHandler),
@@ -72,19 +74,30 @@ func main() {
 
 func updateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	vars := w.(httptools.VarsResponseWriter).Vars()
-	server, summonderId := vars["1"].(string), vars["2"].(string)
+	server, summonerId := vars["1"].(string), vars["2"].(string)
 
-	if !StringArray(strings.Split(options.SummonerWhitelist, ":")).Contains(server + "/" + summonderId) {
+	if !StringArray(strings.Split(options.SummonerWhitelist, ":")).Contains(server + "/" + summonerId) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
-	mh, err := LolKingMatchHistory(path.Join(server, summonderId))
+	c := db.C(server + "-" + summonerId)
+
+	mh, err := LolKingMatchHistory(server + "/" + summonerId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	json.NewEncoder(w).Encode(mh)
+	for _, m := range mh {
+		_, err := c.Upsert(bson.M{
+			"timestamp": m.Date,
+		}, m)
+		if err != nil {
+			log.Printf("Update failed: %s", err)
+			http.Error(w, "Update failed", http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 type StringArray []string
