@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -61,7 +62,13 @@ func main() {
 	db = session.DB("")
 
 	r := httptools.NewRegexpSwitch(map[string]http.Handler{
-		"/update/(euw|na)/([0-9]+)": http.HandlerFunc(updateCollectionHandler),
+		"/(euw|na)/([0-9]+)": httptools.L{
+			httptools.SilentHandler(http.HandlerFunc(whitelistHandler)),
+			httptools.MethodSwitch{
+				"POST": http.HandlerFunc(updateMatchHistory),
+				"GET":  http.HandlerFunc(queryMatchHistory),
+			},
+		},
 		"/.+": http.FileServer(http.Dir(options.StaticContent)),
 	})
 
@@ -72,7 +79,7 @@ func main() {
 	}
 }
 
-func updateCollectionHandler(w http.ResponseWriter, r *http.Request) {
+func whitelistHandler(w http.ResponseWriter, r *http.Request) {
 	vars := w.(httptools.VarsResponseWriter).Vars()
 	server, summonerId := vars["1"].(string), vars["2"].(string)
 
@@ -80,7 +87,11 @@ func updateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
+}
 
+func updateMatchHistory(w http.ResponseWriter, r *http.Request) {
+	vars := w.(httptools.VarsResponseWriter).Vars()
+	server, summonerId := vars["1"].(string), vars["2"].(string)
 	c := db.C(server + "-" + summonerId)
 
 	mh, err := LolKingMatchHistory(server + "/" + summonerId)
@@ -98,6 +109,24 @@ func updateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	http.Error(w, "", http.StatusNoContent)
+}
+
+func queryMatchHistory(w http.ResponseWriter, r *http.Request) {
+	vars := w.(httptools.VarsResponseWriter).Vars()
+	server, summonerId := vars["1"].(string), vars["2"].(string)
+	c := db.C(server + "-" + summonerId)
+
+	var mh []*Match
+	if err := c.Find(bson.M{}).Sort("-timestamp").All(&mh); err != nil {
+		log.Printf("Query failed: %s", err)
+		http.Error(w, "Query failed", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(w)
+	enc.Encode(mh)
 }
 
 type StringArray []string
