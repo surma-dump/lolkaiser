@@ -1,1 +1,23 @@
-<h1>hai</h1>
+<!doctype html>
+<html ng-app="lolkaiser">
+	<head>
+	</head>
+	<body ng-controller="MatchListCtrl">
+		<form>
+			<select ng-model="summoner.server" ng-options="server.id as server.name for server in servers">
+			</select>
+			<input ng-model="summoner.id" placeholder="Summoner ID"/>
+			<button ng-click="loadClick()">Load</button>
+		</form>
+		<div ng-show="history.length > 0">
+			<select ng-model="selectedView" ng-options="view as view.name for view in views" ng-change="updateData()">
+			</select>
+			<pre>
+				{{data}}
+			</pre>
+		</div>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+		<script src="js/lolkaiser.js"></script>
+	</body>
+</html>

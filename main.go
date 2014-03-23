@@ -69,7 +69,7 @@ func main() {
 				"GET":  http.HandlerFunc(queryMatchHistory),
 			},
 		},
-		"/.+": http.FileServer(http.Dir(options.StaticContent)),
+		"/.*": http.FileServer(http.Dir(options.StaticContent)),
 	})
 
 	addr := fmt.Sprintf("0.0.0.0:%d", options.Port)
