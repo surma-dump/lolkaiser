@@ -1,4 +1,4 @@
-angular.module('lolkaiser', [])
+angular.module('lolkaiser', ['angularCharts'])
 .constant('SERVERS', [
 	{
 		id: 'euw',
@@ -11,18 +11,41 @@ angular.module('lolkaiser', [])
 ])
 .constant('VIEWS', [
 	{
-		name: "Champion Stats",
+		name: "Win rate per Champion",
 		f: function(data) {
-			return _(data)
-				.reduce(function(acc, e){
-					if(!acc.hasOwnProperty(e.champion)) {
-						acc[e.champion] = {wins: 0, losses: 0, games: 0};
-					}
-					acc[e.champion].games += 1;
-					acc[e.champion][e.win ? 'wins' : 'losses'] += 1;
-					return acc;
-				}, {})
-		}
+			return {
+				type: 'bar',
+				config: {
+					title: 'Winrate per Champion',
+					tooltips: true,
+					labels: false,
+				},
+				data: {
+					series: ["Champion"],
+					data: _(data)
+						.reduce(function(acc, e){
+							var idx = _(acc).findIndex({'champion': e.champion});
+							if(idx == -1) {
+								idx = acc.push({
+									champion: e.champion, 
+									wins: 0,
+									losses: 0,
+									games: 0
+								})-1;
+							}
+							acc[idx].games += 1;
+							acc[idx][e.win ? 'wins' : 'losses'] += 1;
+							return acc;
+						}, [])
+						.map(function(e) {
+							return {
+								x: e.champion,
+								y: [Math.floor(e.wins/e.games*10000)/100]
+							};
+						})
+				}
+			};
+		},
 	}
 ])
 .factory('matchHistory', ['$q', '$http', function($q, $http) {
@@ -61,6 +84,7 @@ angular.module('lolkaiser', [])
 		isValid: false,
 	};
 
+
 	$scope.hasHistory = function() {
 		return !!$scope.history;
 	}
@@ -86,9 +110,9 @@ angular.module('lolkaiser', [])
 			})
 	}
 
-	$scope.updateData = function() {
-		$scope.data = JSON.stringify($scope.selectedView.f($scope.history), null, 2);
+	$scope.updateChart = function() {
+		$scope.chart = $scope.selectedView.f($scope.history);
 	}
-	$scope.$watch('history', $scope.updateData.bind($scope));
-	$scope.$watch('selectedView', $scope.updateData.bind($scope));
+	$scope.$watch('history', $scope.updateChart.bind($scope));
+	$scope.$watch('selectedView', $scope.updateChart.bind($scope));
 }])

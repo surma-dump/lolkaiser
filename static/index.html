@@ -1,6 +1,12 @@
 <!doctype html>
 <html ng-app="lolkaiser">
 	<head>
+		<style>
+			#chart {
+				width: 800px;
+				height: 800px;
+			}
+		</style>
 	</head>
 	<body ng-controller="MatchListCtrl">
 		<form>
@@ -13,12 +19,13 @@
 		<div ng-show="summoner.isValid">
 			<select ng-model="selectedView" ng-options="view as view.name for view in views">
 			</select>
-			<pre>
-				{{data}}
-			</pre>
+			<div ng-show="!!chart.type" ac-chart="chart.type" ac-data="chart.data" ac-config="chart.config" id="chart" class="chart"></div>
 		</div>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
-		<script src="js/lolkaiser.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
+		<script src="/js/vendor/angular-charts.min.js"></script>
+		<script src="/js/lolkaiser.js"></script>
 	</body>
 </html>
