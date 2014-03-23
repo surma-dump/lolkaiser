@@ -11,15 +11,15 @@ angular.module('lolkaiser', [])
 ])
 .constant('VIEWS', [
 	{
-		name: "Win rate per Champion",
+		name: "Champion Stats",
 		f: function(data) {
 			return _(data)
 				.reduce(function(acc, e){
 					if(!acc.hasOwnProperty(e.champion)) {
-						acc[e.champion] = {wins: 0, games: 0};
+						acc[e.champion] = {wins: 0, losses: 0, games: 0};
 					}
-					acc[e.champion].games++;
-					acc[e.champion].wins += e.win ? 1 : 0;
+					acc[e.champion].games += 1;
+					acc[e.champion][e.win ? 'wins' : 'losses'] += 1;
 					return acc;
 				}, {})
 		}
@@ -38,7 +38,7 @@ angular.module('lolkaiser', [])
 				return result.data;
 			});
 		},
-		refresh: function(server, summonerId) {
+		update: function(server, summonerId) {
 			return $http({
 				url: '/'+server+'/'+summonerId,
 				method: 'POST'
@@ -54,9 +54,11 @@ angular.module('lolkaiser', [])
 .controller('MatchListCtrl', ['$scope', 'matchHistory', 'SERVERS', 'VIEWS', function($scope, matchHistory, SERVERS, VIEWS) {
 	$scope.servers = SERVERS;
 	$scope.views = VIEWS;
+	$scope.selectedView = VIEWS[0];
 
 	$scope.summoner = {
 		server: SERVERS[0].id,
+		isValid: false,
 	};
 
 	$scope.hasHistory = function() {
@@ -66,12 +68,27 @@ angular.module('lolkaiser', [])
 	$scope.loadClick = function() {
 		matchHistory.get($scope.summoner.server, $scope.summoner.id).then(function(history) {
 			$scope.history = history;
+			$scope.summoner.isValid = true;
 		}, function(error) {
 			console.log(error);
+			$scope.summoner.isValid = false;
 		});
 	};
+
+	$scope.updateClick = function() {
+		if(!$scope.summoner.isValid) {
+			return;
+		}
+		matchHistory.update($scope.summoner.server, $scope.summoner.id)
+			.then(matchHistory.get.bind(matchHistory, $scope.summoner.server, $scope.summoner.id))
+			.then(function(history) {
+				$scope.history = history;
+			})
+	}
 
 	$scope.updateData = function() {
 		$scope.data = JSON.stringify($scope.selectedView.f($scope.history), null, 2);
 	}
+	$scope.$watch('history', $scope.updateData.bind($scope));
+	$scope.$watch('selectedView', $scope.updateData.bind($scope));
 }])

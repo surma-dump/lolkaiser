@@ -8,9 +8,10 @@
 			</select>
 			<input ng-model="summoner.id" placeholder="Summoner ID"/>
 			<button ng-click="loadClick()">Load</button>
+			<button ng-click="updateClick()" ng-disabled="!summoner.isValid">Update</button>
 		</form>
-		<div ng-show="history.length > 0">
-			<select ng-model="selectedView" ng-options="view as view.name for view in views" ng-change="updateData()">
+		<div ng-show="summoner.isValid">
+			<select ng-model="selectedView" ng-options="view as view.name for view in views">
 			</select>
 			<pre>
 				{{data}}
