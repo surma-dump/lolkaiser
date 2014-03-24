@@ -26,11 +26,13 @@
 			</select>
 			<div ng-show="!!chart.type" ac-chart="chart.type" ac-data="chart.data" ac-config="chart.config" id="chart" class="chart"></div>
 		</div>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
-		<script src="/js/vendor/angular-charts.min.js"></script>
-		<script src="/js/lolkaiser.js"></script>
+
+		<!-- build:js js/app.js -->
+		<script src="../bower_components/lodash/dist/lodash.js"></script>
+		<script src="../bower_components/angular/angular.js"></script>
+		<script src="../bower_components/d3/d3.js"></script>
+		<script src="../bower_components/nvd3/nv.d3.js"></script>
+		<script src="js/lolkaiser.js"></script>
+		<!-- endbuild -->
 	</body>
 </html>

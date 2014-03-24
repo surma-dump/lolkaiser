@@ -1,4 +1,4 @@
-angular.module('lolkaiser', ['angularCharts'])
+angular.module('lolkaiser', [])
 .constant('INPUT', {
 	"servers": [
 		{
