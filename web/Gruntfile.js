@@ -34,12 +34,22 @@ module.exports = function(grunt) {
 
     usemin: {
       html: 'dist/index.html'
+    },
+
+    watch: {
+      scripts: {
+        files: ['src/**'],
+        tasks: ['dev'],
+        interrupt: true,
+        atBegin: true
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-usemin');
 
   grunt.registerTask('default', ['copy:html', 'useminPrepare', 'concat', 'uglify', 'usemin']);

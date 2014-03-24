@@ -1,1 +1,1 @@
-angular.module('lolkaiser', []);
+angular.module('lolkaiser', ['nvd3ChartDirectives']);
