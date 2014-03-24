@@ -10,7 +10,7 @@
 	</head>
 	<body ng-controller="MatchListCtrl">
 		<form>
-			<select ng-model="summoner.server" ng-options="server.id as server.name for server in input.servers">
+			<select ng-model="summoner.server" ng-options="server.id as server.name for server in config.servers">
 			</select>
 			<input ng-model="summoner.id" placeholder="Summoner ID"/>
 			<button ng-click="loadClick()">Load</button>
@@ -18,11 +18,11 @@
 		</form>
 		<div ng-show="summoner.isValid">
 			<div>
-				<label ng-repeat="gametype in input.gametypes">
+				<label ng-repeat="gametype in config.gametypes">
 					<input type="checkbox" ng-model="selections.gametypes[$index].selected" /> {{gametype.name}}
 				</label>
 			</div>
-			<select ng-model="selections.mapping" ng-options="mapping as mapping.name for mapping in input.mappings">
+			<select ng-model="selections.mapping" ng-options="mapping as mapping.name for mapping in config.mappings">
 			</select>
 			<div ng-show="!!chart.type" ac-chart="chart.type" ac-data="chart.data" ac-config="chart.config" id="chart" class="chart"></div>
 		</div>
@@ -33,6 +33,9 @@
 		<script src="../bower_components/d3/d3.js"></script>
 		<script src="../bower_components/nvd3/nv.d3.js"></script>
 		<script src="js/lolkaiser.js"></script>
+		<script src="js/config.js"></script>
+		<script src="js/matchhistory.js"></script>
+		<script src="js/matchlistctrl.js"></script>
 		<!-- endbuild -->
 	</body>
 </html>
