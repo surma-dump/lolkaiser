@@ -27,6 +27,12 @@ module.exports = function(grunt) {
             cwd: '.tmp/concat',
             src: '**/*.js',
             dest: 'dist'
+          },
+          {
+            expand: true,
+            cwd: '.tmp/concat',
+            src: '**/*.css',
+            dest: 'dist'
           }
         ]
       }
@@ -47,12 +53,13 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-usemin');
 
-  grunt.registerTask('default', ['copy:html', 'useminPrepare', 'concat', 'uglify', 'usemin']);
+  grunt.registerTask('default', ['copy:html', 'useminPrepare', 'concat', 'uglify', 'cssmin', 'usemin']);
   grunt.registerTask('dev', ['copy:html', 'useminPrepare', 'concat', 'copy:tmp', 'usemin']);
 
 };

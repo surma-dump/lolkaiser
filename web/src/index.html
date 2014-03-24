@@ -1,12 +1,9 @@
 <!doctype html>
 <html ng-app="lolkaiser">
 	<head>
-		<style>
-			#chart {
-				width: 800px;
-				height: 400px;
-			}
-		</style>
+		<!-- build:css css/app.css -->
+		<link rel="stylesheet" href="../bower_components/nvd3/nv.d3.css">
+		<!-- endbuild -->
 	</head>
 	<body ng-controller="MatchListCtrl">
 		<form>
@@ -24,7 +21,14 @@
 			</div>
 			<select ng-model="selections.mapping" ng-options="mapping as mapping.name for mapping in config.mappings">
 			</select>
-			<div ng-show="!!chart.type" ac-chart="chart.type" ac-data="chart.data" ac-config="chart.config" id="chart" class="chart"></div>
+			<nvd3-discrete-bar-chart 
+				ng-if="chart.type == 'bar'"
+				data="chart.data"
+				showXAxis="true"
+				showYAxis="true"
+				>
+				<svg></svg>
+			</nvd3-discrete-bar-chart>
 		</div>
 
 		<!-- build:js js/app.js -->

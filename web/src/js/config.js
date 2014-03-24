@@ -88,36 +88,32 @@ angular.module('lolkaiser').constant('CONFIG', {
 			f: function(data) {
 				return {
 					type: 'bar',
-					config: {
-						title: 'Winrate per Champion',
-						tooltips: true,
-						labels: false,
-					},
-					data: {
-						series: ["Champion"],
-						data: _(_(data)
-							.reduce(function(acc, e){
-								var idx = _(acc).findIndex({'champion': e.champion});
-								if(idx == -1) {
-									idx = acc.push({
-										champion: e.champion, 
-										wins: 0,
-										losses: 0,
-										games: 0
-									})-1;
-								}
-								acc[idx].games += 1;
-								acc[idx][e.win ? 'wins' : 'losses'] += 1;
-								return acc;
-							}, []))
-							.map(function(e) {
-								return {
-									x: e.champion,
-									y: [Math.floor(e.wins/e.games*10000)/100]
-								};
-							})
-							.__wrapped__
-					}
+					data: [
+						{
+							key: "Win rate per Champion",
+							values: _(data)
+								.reduce(function(acc, e){
+									var idx = _(acc).findIndex({'champion': e.champion});
+									if(idx == -1) {
+										idx = acc.push({
+											champion: e.champion,
+											wins: 0,
+											losses: 0,
+											games: 0
+										})-1;
+									}
+									acc[idx].games += 1;
+									acc[idx][e.win ? 'wins' : 'losses'] += 1;
+									return acc;
+								}, [])
+								.map(function(e) {
+									return [
+										e.champion,
+										Math.floor(e.wins/e.games*10000)/100
+									];
+								})
+						}
+					]
 				};
 			},
 		}
