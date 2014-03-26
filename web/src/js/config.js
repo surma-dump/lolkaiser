@@ -87,7 +87,7 @@ angular.module('lolkaiser').constant('CONFIG', {
 			name: 'Win rate per Champion',
 			f: function(data) {
 				return {
-					type: 'bar',
+					type: 'horizontal-bar',
 					data: [
 						{
 							key: 'Win rate per Champion',
@@ -120,7 +120,7 @@ angular.module('lolkaiser').constant('CONFIG', {
 		{
 			name: 'Win rate over time',
 			f: function(data) {
-				var sliceWidth = 3;
+				var sliceWidth = 20;
 				return {
 					type: 'line',
 					data: [
@@ -150,7 +150,7 @@ angular.module('lolkaiser').constant('CONFIG', {
 		{
 			name: 'Champions played over time',
 			f: function(data) {
-				var sliceWidth = 3;
+				var sliceWidth = 20;
 				var champions = _(data).map('champion').uniq().__wrapped__;
 				data = _(data)
 					.sortBy('timestamp')

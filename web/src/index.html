@@ -21,14 +21,17 @@
 			</div>
 			<select ng-model="selections.mapping" ng-options="mapping as mapping.name for mapping in config.mappings">
 			</select>
-			<nvd3-discrete-bar-chart
-				ng-if="chart.type == 'bar'"
+			<nvd3-multi-bar-horizontal-chart
+				ng-if="chart.type == 'horizontal-bar'"
 				data="chart.data"
 				showXAxis="true"
 				showYAxis="true"
-				>
+				interactive="true"
+				tooltips="true"
+				width="600"
+				height="600">
 				<svg></svg>
-			</nvd3-discrete-bar-chart>
+			</nvd3-multi-bar-horizontal-chart>
 			<nvd3-stacked-area-chart
 				ng-if="chart.type == 'stacked-area'"
 				data="chart.data"
@@ -36,7 +39,9 @@
 				showYAxis="true"
 				showLegend="true"
 				style="chart.style"
-				>
+				interactive="true"
+				width="600"
+				height="600">
 				<svg></svg>
 			</nvd3-stacked-area-chart>
 			<nvd3-line-chart
@@ -48,7 +53,8 @@
 				style="chart.style"
 				interactive="true"
 				tooltips="true"
-				>
+				width="600"
+				height="600">
 				<svg></svg>
 			</nvd3-stacked-area-chart>
 		</div>
