@@ -12,73 +12,46 @@ angular.module('lolkaiser').constant('CONFIG', {
 	gametypes: [
 		{
 			name: 'Normal 5v5',
-			f: function(data) {
-				return _(data)
-					.filter(function(e) {
-						return e.game_type == 'Normal 5v5';
-					})
-					.__wrapped__;
+			f: function(matches) {
+				return [for(m of matches) if(m.game_type == 'Normal 5v5') m];
 			}
 		},
 		{
 			name: 'Ranked Solo 5v5',
-			f: function(data) {
-				return _(data)
-					.filter(function(e) {
-						return e.game_type == 'Ranked Solo 5v5';
-					})
-					.__wrapped__;
+			f: function(matches) {
+				return [for(m of matches) if(m.game_type == 'Ranked Solo 5v5') m];
 			}
 		},
 		{
 			name: 'Co-Op Vs AI',
-			f: function(data) {
-				return _(data)
-					.filter(function(e) {
-						return e.game_type == 'Co-Op Vs AI';
-					})
-					.__wrapped__;
+			f: function(matches) {
+				return [for(m of matches) if(m.game_type == 'Co-Op Vs AI') m];
 			}
 		}
 	],
 	timepoints: [
 		{
 			name: 'After start of Season 3',
-			f: function(data) {
-				return _(data)
-					.filter(function(e) {
-						return e.timestamp > '2013-02-01T00:00:00Z';
-					})
-					.__wrapped__;
+			f: function(matches) {
+				return [for(m of matches) if(m.timestamp > '2013-02-01T00:00:00Z') m];
 			}
 		},
 		{
 			name: 'Before start of Season 4',
-			f: function(data) {
-				return _(data)
-					.filter(function(e) {
-						return e.timestamp < '2013-01-17T00:00:00Z';
-					})
-					.__wrapped__;
+			f: function(matches) {
+				return [for(m of matches) if(m.timestamp < '2014-01-17T00:00:00Z') m];
 			}
 		},
 		{
 			name: 'After start of Season 4',
-			f: function(data) {
-				return _(data)
-					.filter(function(e) {
-						return e.timestamp > '2013-01-17T00:00:00Z';
-					})
-					.__wrapped__;
+			f: function(matches) {
+				return [for(m of matches) if(m.timestamp > '2014-01-17T00:00:00Z') m];
 			}
 		},
 		{
 			name: 'Last 50 games',
-			f: function(data) {
-				return _(data)
-					.sortBy('timestamp')
-					.last(50)
-					.__wrapped__;
+			f: function(matches) {
+				return matches.slice(0, 50);
 			}
 		}
 	],
@@ -119,29 +92,26 @@ angular.module('lolkaiser').constant('CONFIG', {
 		},
 		{
 			name: 'Win rate over time',
-			f: function(data) {
+			f: function(matches) {
 				var sliceWidth = 20;
 				return {
 					type: 'line',
 					data: [
 						{
 							key: 'Win rate over time',
-							values: _(data)
-								.sortBy('timestamp')
-								.reverse()
+							values: matches
 								.map(function(e, i, c) {
 									return c.slice(i, i+sliceWidth);
 								})
-								.filter(function(e) {
-									return _(e).size() == sliceWidth;
-								})
+								.filter((e) => {return e.length == sliceWidth;})
 								.map(function(e) {
-									return _(e).filter('win').size()/sliceWidth;
+									return e
+										.filter((e) => {return e.win;})
+										.length/sliceWidth;
 								})
 								.map(function(e, i) {
 									return [i, Math.floor(e*10000)/100];
 								})
-								.__wrapped__
 						}
 					]
 				}
@@ -151,31 +121,29 @@ angular.module('lolkaiser').constant('CONFIG', {
 			name: 'Champions played over time',
 			f: function(data) {
 				var sliceWidth = 20;
-				var champions = _(data).map('champion').uniq().__wrapped__;
-				data = _(data)
-					.sortBy('timestamp')
-					.reverse()
+				var champions = data
+					.map((e) => { return e.champion })
+					.filter((e, i, c) => {return c.indexOf(e) == i});
+				data = data
 					.map(function(e, i, c) {
 						return c.slice(i, i+sliceWidth);
 					})
 					.map(function(e) {
 						return _(e).countBy('champion').__wrapped__;
-					})
-					.__wrapped__
+					});
 
 				return {
 					type: 'stacked-area',
 					style: 'expand',
 					c: champions,
-					data: _(champions).map(function(c) {
+					data: champions.map(function(c) {
 						return {
 							key: c,
-							values: _(data).map(function(e, i) {
+							values: data.map(function(e, i) {
 								return [i, e[c] || 0];
-							}).__wrapped__
+							})
 						}
 					})
-					.__wrapped__
 				};
 			},
 		}

@@ -30,12 +30,13 @@ module.exports = function(grunt) {
       },
       js: {
         src: [
-            'bower_components/lodash/dist/lodash.js',
-            'bower_components/angular/angular.js',
-            'bower_components/d3/d3.js',
-            'bower_components/nvd3/nv.d3.js',
-            'bower_components/angularjs-nvd3-directives/dist/angularjs-nvd3-directives.js',
-            '.tmp/concat/traceur/main.js'
+          'node_modules/grunt-traceur/node_modules/traceur/src/runtime/runtime.js',
+          'bower_components/lodash/dist/lodash.js',
+          'bower_components/angular/angular.js',
+          'bower_components/d3/d3.js',
+          'bower_components/nvd3/nv.d3.js',
+          'bower_components/angularjs-nvd3-directives/dist/angularjs-nvd3-directives.js',
+          '.tmp/concat/traceur/main.js'
         ],
         dest: '.tmp/concat/js/main.js'
       },
