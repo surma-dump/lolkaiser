@@ -2,11 +2,77 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
-    useminPrepare: {
-      options: {
-        dest: 'dist'
+    traceur: {
+      options: {},
+      js: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src',
+            src: [
+              'js/**/*.js'
+            ],
+            dest: '.tmp/traceur'
+          }
+        ]
+      }
+    },
+
+    concat: {
+      traceur: {
+        src: [
+          '.tmp/traceur/js/lolkaiser.js',
+          '.tmp/traceur/js/config.js',
+          '.tmp/traceur/js/matchhistory.js',
+          '.tmp/traceur/js/matchlistctrl.js'
+        ],
+        dest: '.tmp/concat/traceur/main.js',
       },
-      html: 'src/index.html'
+      js: {
+        src: [
+            'bower_components/lodash/dist/lodash.js',
+            'bower_components/angular/angular.js',
+            'bower_components/d3/d3.js',
+            'bower_components/nvd3/nv.d3.js',
+            'bower_components/angularjs-nvd3-directives/dist/angularjs-nvd3-directives.js',
+            '.tmp/concat/traceur/main.js'
+        ],
+        dest: '.tmp/concat/js/main.js'
+      },
+      css: {
+        src: [
+          'bower_components/nvd3/nv.d3.css'
+        ],
+        dest: '.tmp/concat/css/style.css'
+      }
+    },
+
+    uglify: {
+      options: {},
+      js: {
+        files: [
+          {
+            expand: true,
+            cwd: '.tmp/concat/js/',
+            src: '**/*.js',
+            dest: '.tmp/uglify'
+          }
+        ]
+      }
+    },
+
+    cssmin: {
+      options: {},
+      css: {
+        files: [
+          {
+            expand: true,
+            cwd: '.tmp/concat/css',
+            src: '**/*.css',
+            dest: '.tmp/cssmin'
+        }
+        ]
+      }
     },
 
     copy: {
@@ -20,33 +86,52 @@ module.exports = function(grunt) {
           }
         ]
       },
-      tmp: {
+      tmpjs: {
         files: [
           {
             expand: true,
-            cwd: '.tmp/concat',
+            cwd: '.tmp/concat/js',
             src: '**/*.js',
-            dest: 'dist'
-          },
+            dest: 'dist/js'
+          }
+        ]
+      },
+      js: {
+        files: [
           {
             expand: true,
-            cwd: '.tmp/concat',
+            cwd: '.tmp/uglify',
+            src: '**/*.js',
+            dest: 'dist/js'
+          }
+        ]
+      },
+      css: {
+        files: [
+          {
+            expand: true,
+            cwd: '.tmp/cssmin',
             src: '**/*.css',
-            dest: 'dist'
+            dest: 'dist/css'
+          }
+        ]
+      },
+      tmpcss: {
+        files: [
+          {
+            expand: true,
+            cwd: '.tmp/concat/css',
+            src: '**/*.css',
+            dest: 'dist/css'
           }
         ]
       }
-    },
-
-    usemin: {
-      html: 'dist/index.html'
     },
 
     watch: {
       scripts: {
         files: ['src/**'],
         tasks: ['dev'],
-        interrupt: true,
         atBegin: true
       }
     }
@@ -57,9 +142,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
-  grunt.loadNpmTasks('grunt-usemin');
+  grunt.loadNpmTasks('grunt-traceur');
 
-  grunt.registerTask('default', ['copy:html', 'useminPrepare', 'concat', 'uglify', 'cssmin', 'usemin']);
-  grunt.registerTask('dev', ['copy:html', 'useminPrepare', 'concat', 'copy:tmp', 'usemin']);
-
+  grunt.registerTask('default', ['traceur', 'concat', 'uglify', 'cssmin', 'copy:html', 'copy:css', 'copy:js']);
+  grunt.registerTask('dev', ['traceur', 'concat', 'copy:html', 'copy:tmpcss', 'copy:tmpjs']);
 };
