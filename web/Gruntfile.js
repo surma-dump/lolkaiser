@@ -30,6 +30,7 @@ module.exports = function(grunt) {
       },
       js: {
         src: [
+          'bower_components/es6-shim/es6-shim.js',
           'node_modules/grunt-traceur/node_modules/traceur/src/runtime/runtime.js',
           'bower_components/lodash/dist/lodash.js',
           'bower_components/angular/angular.js',
