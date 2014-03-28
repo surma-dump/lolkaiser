@@ -9,7 +9,8 @@
   "dependencies": {
     "angularjs-nvd3-directives": "~0.0.5-beta",
     "lodash": "~2.4.1",
-    "angular": "~1.2.15"
+    "angular": "~1.2.15",
+    "es6-shim": "~0.10.1"
   },
   "resolutions": {
     "d3": "3.3.11",
