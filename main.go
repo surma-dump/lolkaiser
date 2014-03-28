@@ -23,7 +23,7 @@ var (
 		Help              goptions.Help `goptions:"-h, --help, description='Show this help'"`
 	}{
 		Port:          5000,
-		StaticContent: "web/dist",
+		StaticContent: "dist",
 	}
 )
 

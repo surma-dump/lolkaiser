@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         files: [
           {
             expand: true,
-            cwd: 'src',
+            cwd: 'web',
             src: [
               'js/**/*.js'
             ],
@@ -82,7 +82,7 @@ module.exports = function(grunt) {
         files: [
           {
             expand: true,
-            cwd: 'src',
+            cwd: 'web',
             src: '**/*.html',
             dest: 'dist/'
           }
@@ -132,7 +132,7 @@ module.exports = function(grunt) {
 
     watch: {
       scripts: {
-        files: ['src/**'],
+        files: ['web/**'],
         tasks: ['dev'],
         atBegin: true
       }
