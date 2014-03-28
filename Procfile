@@ -1,1 +1,1 @@
-web: lolkaiser -p $PORT --apikey $APIKEY --redis $REDISTOGO_URL
+web: lolkaiser -p $PORT -m $MONGODB_URL -w $WHITELIST

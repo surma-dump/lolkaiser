@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/surma/httptools"
 	"github.com/voxelbrain/goptions"
-	"gopkg.in/surma/v1.2.1/httptools"
 
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"

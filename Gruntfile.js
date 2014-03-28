@@ -146,6 +146,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-traceur');
 
-  grunt.registerTask('default', ['traceur', 'concat', 'uglify', 'cssmin', 'copy:html', 'copy:css', 'copy:js']);
+  grunt.registerTask('build', ['traceur', 'concat', 'uglify', 'cssmin', 'copy:html', 'copy:css', 'copy:js']);
   grunt.registerTask('dev', ['traceur', 'concat', 'copy:html', 'copy:tmpcss', 'copy:tmpjs']);
+  grunt.registerTask('heroku', ['build']);
+  grunt.registerTask('default', ['build']);
 };
