@@ -63,6 +63,37 @@ angular.module('lolkaiser').constant('CONFIG', {
 	],
 	mappings: [
 		{
+			name: 'Champions played over time',
+			f: function(data) {
+				var sliceWidth = 20;
+				var champions = new Set();
+				data.forEach(e => champions.add(e.champion))
+				data = data
+					.map(function(e, i, c) {
+						return c.slice(i, i+sliceWidth);
+					})
+					.map(function(e) {
+						return _(e).countBy('champion').__wrapped__;
+					});
+
+				result = [];
+				champions.forEach(function(c) {
+					result.push({
+						key: c,
+						values: data.map(function(e, i) {
+							return [i, e[c] || 0];
+						})
+					});
+				})
+				return {
+					type: 'stacked-area',
+					style: 'expand',
+					c: champions,
+					data: result
+				};
+			},
+		},
+		{
 			name: 'Win rate per Champion',
 			f: function(data) {
 				return {
@@ -122,37 +153,6 @@ angular.module('lolkaiser').constant('CONFIG', {
 					]
 				}
 			}
-		},
-		{
-			name: 'Champions played over time',
-			f: function(data) {
-				var sliceWidth = 20;
-				var champions = new Set();
-				data.forEach(e => champions.add(e.champion))
-				data = data
-					.map(function(e, i, c) {
-						return c.slice(i, i+sliceWidth);
-					})
-					.map(function(e) {
-						return _(e).countBy('champion').__wrapped__;
-					});
-
-				result = [];
-				champions.forEach(function(c) {
-					result.push({
-						key: c,
-						values: data.map(function(e, i) {
-							return [i, e[c] || 0];
-						})
-					});
-				})
-				return {
-					type: 'stacked-area',
-					style: 'expand',
-					c: champions,
-					data: result
-				};
-			},
 		}
 	]
 });
