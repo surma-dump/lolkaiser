@@ -17,6 +17,11 @@
 					<input type="checkbox" ng-model="selections.gametypes[$index].selected" /> {{gametype.name}}
 				</label>
 			</div>
+			<div>
+				<label ng-repeat="timepoint in config.timepoints">
+					<input type="checkbox" ng-model="selections.timepoints[$index].selected" /> {{timepoint.name}}
+				</label>
+			</div>
 			<select ng-model="selections.mapping" ng-options="mapping as mapping.name for mapping in config.mappings">
 			</select>
 			<nvd3-multi-bar-horizontal-chart

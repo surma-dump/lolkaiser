@@ -1,10 +1,14 @@
 angular.module('lolkaiser').controller('MatchListCtrl', ['$scope', 'matchHistory', 'CONFIG', function($scope, matchHistory, CONFIG) {
 	$scope.history = [];
 	$scope.config = CONFIG;
+	CONFIG.gametypes[0].selected = true;
+	CONFIG.timepoints[0].selected = true;
 	$scope.selections = {
 		mapping: CONFIG.mappings[0],
-		gametypes: CONFIG.gametypes
+		gametypes: CONFIG.gametypes,
+		timepoints: CONFIG.timepoints
 	};
+
 
 	$scope.summoner = {
 		server: CONFIG.servers[0].id,
@@ -32,20 +36,25 @@ angular.module('lolkaiser').controller('MatchListCtrl', ['$scope', 'matchHistory
 		}
 		matchHistory.update($scope.summoner.server, $scope.summoner.id)
 			.then(matchHistory.get.bind(matchHistory, $scope.summoner.server, $scope.summoner.id))
-			.then(function(history) {
+			.then((history) => {
+				console.log('Got it', history);
 				$scope.history = history;
 			});
 	};
 
 	$scope.updateChart = function() {
-		var data = [];
-		var filters = _($scope.selections.gametypes).filter('selected');
-		filters.forEach(function(e) {
-			data = _.union(data, e.f($scope.history));	
-		});
-		if(filters.size() === 0) {
+		var filters = $scope.selections.gametypes.filter(e => e.selected);
+		var data = $scope.history.filter(m => {
+			return filters.map(e => e.f(m)).indexOf(true) != -1;
+		})
+		if(filters.length === 0) {
 			data = $scope.history;
 		}
+
+		$scope.selections.timepoints
+			.filter(e => e.selected)
+			.forEach(e => {data = e.f(data)});
+
 		$scope.chart = $scope.selections.mapping.f(data);
 	};
 	$scope.$watch('history', $scope.updateChart.bind($scope));

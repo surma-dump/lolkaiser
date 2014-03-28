@@ -11,25 +11,37 @@ angular.module('lolkaiser').constant('CONFIG', {
 	],
 	gametypes: [
 		{
-			name: 'Normal 5v5',
-			f: function(matches) {
-				return [for(m of matches) if(m.game_type == 'Normal 5v5') m];
+			name: 'Ranked Solo 5v5',
+			f: function(m) {
+				return m.game_type == 'Ranked Solo 5v5';
 			}
 		},
 		{
-			name: 'Ranked Solo 5v5',
-			f: function(matches) {
-				return [for(m of matches) if(m.game_type == 'Ranked Solo 5v5') m];
+			name: 'Normal 5v5',
+			f: function(m) {
+				return m.game_type == 'Normal 5v5';
+			}
+		},
+		{
+			name: 'Team Builder',
+			f: function(m) {
+				return m.game_type == 'Team Builder';
 			}
 		},
 		{
 			name: 'Co-Op Vs AI',
-			f: function(matches) {
-				return [for(m of matches) if(m.game_type == 'Co-Op Vs AI') m];
+			f: function(m) {
+				return m.game_type == 'Co-Op Vs AI';
 			}
 		}
 	],
 	timepoints: [
+		{
+			name: 'Last 100 games',
+			f: function(matches) {
+				return matches.slice(0, 100);
+			}
+		},
 		{
 			name: 'After start of Season 3',
 			f: function(matches) {
@@ -46,12 +58,6 @@ angular.module('lolkaiser').constant('CONFIG', {
 			name: 'After start of Season 4',
 			f: function(matches) {
 				return [for(m of matches) if(m.timestamp > '2014-01-17T00:00:00Z') m];
-			}
-		},
-		{
-			name: 'Last 50 games',
-			f: function(matches) {
-				return matches.slice(0, 50);
 			}
 		}
 	],
