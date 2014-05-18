@@ -41,11 +41,24 @@ func main() {
 	db = session.DB("")
 
 	r := httptools.NewRegexpSwitch(map[string]http.Handler{
+		"/(euw|na)/([0-9]+)/parse": httptools.L{
+			httptools.SilentHandler(http.HandlerFunc(whitelistHandler)),
+			httptools.L{
+				httptools.SilentHandler(http.HandlerFunc(parseMatchHistory)),
+				http.HandlerFunc(dumpMatchHistory),
+			},
+		},
 		"/(euw|na)/([0-9]+)": httptools.L{
 			httptools.SilentHandler(http.HandlerFunc(whitelistHandler)),
 			httptools.MethodSwitch{
-				"POST": http.HandlerFunc(updateMatchHistory),
-				"GET":  http.HandlerFunc(queryMatchHistory),
+				"POST": httptools.L{
+					httptools.SilentHandler(http.HandlerFunc(parseMatchHistory)),
+					http.HandlerFunc(saveMatchHistory),
+				},
+				"GET": httptools.L{
+					httptools.SilentHandler(http.HandlerFunc(queryMatchHistory)),
+					http.HandlerFunc(dumpMatchHistory),
+				},
 			},
 		},
 		"/.*": http.FileServer(http.Dir(options.StaticContent)),
@@ -66,18 +79,29 @@ func whitelistHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
+
+	vars["server"] = server
+	vars["summonerId"] = summonerId
 }
 
-func updateMatchHistory(w http.ResponseWriter, r *http.Request) {
+func parseMatchHistory(w http.ResponseWriter, r *http.Request) {
 	vars := w.(httptools.VarsResponseWriter).Vars()
-	server, summonerId := vars["1"].(string), vars["2"].(string)
-	c := db.C(server + "-" + summonerId)
+	server, summonerId := vars["server"].(string), vars["summonerId"].(string)
 
 	mh, err := LolKingMatchHistory(server + "/" + summonerId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	vars["history"] = mh
+}
+
+func saveMatchHistory(w http.ResponseWriter, r *http.Request) {
+	vars := w.(httptools.VarsResponseWriter).Vars()
+	mh := vars["history"].([]*Match)
+	server, summonerId := vars["server"].(string), vars["summonerId"].(string)
+	c := db.C(server + "-" + summonerId)
+
 	for _, m := range mh {
 		_, err := c.Upsert(bson.M{
 			"timestamp": m.Date,
@@ -89,6 +113,15 @@ func updateMatchHistory(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.Error(w, "", http.StatusNoContent)
+}
+
+func dumpMatchHistory(w http.ResponseWriter, r *http.Request) {
+	vars := w.(httptools.VarsResponseWriter).Vars()
+	mh := vars["history"].([]*Match)
+
+	w.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(w)
+	enc.Encode(mh)
 }
 
 func queryMatchHistory(w http.ResponseWriter, r *http.Request) {
@@ -103,9 +136,7 @@ func queryMatchHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	enc := json.NewEncoder(w)
-	enc.Encode(mh)
+	vars["history"] = mh
 }
 
 type StringArray []string

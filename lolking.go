@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"log"
 	"path"
 	"reflect"
 	"strconv"
@@ -19,30 +18,25 @@ type FieldExtractor func(s *goquery.Selection) interface{}
 
 var Extractors = map[string]FieldExtractor{
 	"timestamp": func(s *goquery.Selection) interface{} {
-		timestamp, _ := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(2) > div:nth-child(1) > div:nth-child(3) > span").Attr("data-hoverswitch")
-		t, err := time.Parse("1/2/06 3:04PM MST", timestamp)
-		if err != nil {
-			log.Printf("Invalid timestamp %s: %s", timestamp, err)
-		}
-		return t
+		return time.Unix(0, 0)
 	},
 	"champion": func(s *goquery.Selection) interface{} {
-		return extractChampion(s.Find("div:nth-child(1) > div.match_details_cell:nth-child(1) > div:nth-child(1) > div:nth-child(1) > a"))
+		return s.Find(".match-details-cell-body .match-summoner-details-champion a").Text()
 	},
 	"win": func(s *goquery.Selection) interface{} {
-		return s.HasClass("match_win")
+		return s.Find(".match-details-cell-header > div:nth-child(4) > div:nth-child(1)").Text() == "WIN"
 	},
 	"game_type": func(s *goquery.Selection) interface{} {
-		node := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(2) > div:nth-child(1) > div:nth-child(1)")
+		node := s.Find(".match-details-cell-header > div:nth-child(1) > div:nth-child(1)")
 		return strings.TrimSpace(node.Text())
 	},
 	"length": func(s *goquery.Selection) interface{} {
-		node := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(3) > div:nth-child(1) > strong").Text()
-		length, _ := strconv.ParseInt(strings.TrimSuffix(node, " mins"), 10, 64)
+		node := s.Find(".match-details-cell-header > div:nth-child(3) > div:nth-child(1)").Text()
+		length, _ := strconv.ParseInt(strings.TrimSuffix(node, " Minutes"), 10, 64)
 		return int(length)
 	},
 	"kda": func(s *goquery.Selection) interface{} {
-		node := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(4) > div:nth-child(1) > strong")
+		node := s.Find(".match-details-cell-body .match-summoner-details-champion + div .match_details_cell-stats strong")
 		kda := make([]int, 0, 3)
 		node.Each(func(_ int, s *goquery.Selection) {
 			v, _ := strconv.ParseInt(s.Text(), 10, 64)
@@ -51,7 +45,7 @@ var Extractors = map[string]FieldExtractor{
 		return kda
 	},
 	"gold": func(s *goquery.Selection) interface{} {
-		node := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(5) > div:nth-child(1) > strong")
+		node := s.Find(".match-details-cell-body .match-summoner-details-champion + div .match_details_cell-extra_stats > div:nth-child(1) strong")
 		textVal := strings.TrimSpace(node.Text())
 		multiplier := 1.0
 		if strings.HasSuffix(textVal, "k") {
@@ -62,18 +56,19 @@ var Extractors = map[string]FieldExtractor{
 		return int(v * multiplier)
 	},
 	"minions": func(s *goquery.Selection) interface{} {
-		node := s.Find("div:nth-child(1) > div.match_details_cell:nth-child(6) > div:nth-child(1) > strong")
+		node := s.Find(".match-details-cell-body .match-summoner-details-champion + div .match_details_cell-extra_stats > div:nth-child(2) strong")
 		v, _ := strconv.ParseInt(strings.TrimSpace(node.Text()), 10, 64)
 		return int(v)
 	},
 	"teams": func(s *goquery.Selection) interface{} {
-		node1 := s.Find("div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > table td:nth-child(1) table tr:not(:nth-child(1))")
-		node2 := s.Find("div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > table td:nth-child(3) table tr:not(:nth-child(1))")
+		node := s.Find(".match-details-cell-body .match-details-table")
+		node1 := node.Find("tr:nth-child(3), tr:nth-child(4), tr:nth-child(5), tr:nth-child(6), tr:nth-child(7)")
+		node2 := node.Find("tr:nth-child(10), tr:nth-child(11), tr:nth-child(12), tr:nth-child(13), tr:nth-child(14)")
 
 		team := make([]Player, 0, 5)
 		f := func(_ int, s *goquery.Selection) {
-			champ := extractChampion(s.Find("td:nth-child(1) a"))
-			summoner := s.Find("td:nth-child(2)").Text()
+			champ := ""
+			summoner := s.Find(".summoner-name a").Text()
 			team = append(team, Player{
 				Champion:     champ,
 				SummonerName: summoner,
@@ -93,21 +88,11 @@ var Extractors = map[string]FieldExtractor{
 		return r
 	},
 	"largest_multikill": func(s *goquery.Selection) interface{} {
-		node := s.Find("div:nth-child(2) > div:nth-child(1) > div:nth-child(2) tr:nth-child(4) td:nth-child(2)")
-		v, _ := strconv.ParseInt(node.Text(), 10, 64)
-		return int(v)
+		return 0
 	},
 	"time_dead": func(s *goquery.Selection) interface{} {
-		node := s.Find("div:nth-child(2) > div:nth-child(1) > div:nth-child(2) tr:nth-child(5) td:nth-child(2)")
-		v, _ := strconv.ParseInt(node.Text(), 10, 64)
-		return int(v)
+		return 0
 	},
-}
-
-func extractChampion(s *goquery.Selection) string {
-	href, _ := s.Attr("href")
-	elems := strings.Split(href, "/")
-	return elems[len(elems)-1]
 }
 
 func LolKingMatchHistory(id string) ([]*Match, error) {
@@ -118,7 +103,7 @@ func LolKingMatchHistory(id string) ([]*Match, error) {
 	}
 
 	r := make([]*Match, 0)
-	sel := doc.Find(".match_loss, .match_win")
+	sel := doc.Find(".match-details-cell")
 	sel.Each(func(_ int, s *goquery.Selection) {
 		r = append(r, ConvertMatch(s))
 	})
