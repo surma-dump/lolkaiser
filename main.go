@@ -114,6 +114,7 @@ func parseMatchHistory(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	vars["history"] = mh
 }
 
@@ -138,11 +139,10 @@ func saveMatchHistory(w http.ResponseWriter, r *http.Request) {
 
 func dumpMatchHistory(w http.ResponseWriter, r *http.Request) {
 	vars := w.(httptools.VarsResponseWriter).Vars()
-	mh := vars["history"].([]goriot.Game)
 
 	w.Header().Set("Content-Type", "application/json")
 	enc := json.NewEncoder(w)
-	enc.Encode(mh)
+	enc.Encode(vars["history"])
 }
 
 func queryMatchHistory(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +150,7 @@ func queryMatchHistory(w http.ResponseWriter, r *http.Request) {
 	server, summonerId := vars["server"].(string), vars["summonerId"].(int64)
 	c := db.C(fmt.Sprintf("%s-%d", server, summonerId))
 
-	var mh []goriot.Game
+	var mh []Game
 	if err := c.Find(bson.M{}).Sort("-timestamp").All(&mh); err != nil {
 		log.Printf("Query failed: %s", err)
 		http.Error(w, "Query failed", http.StatusInternalServerError)
