@@ -1,1 +1,1 @@
-web: lolkaiser -p $PORT -m $MONGODB_URL -w $WHITELIST
+web: lolkaiser -p $PORT -m $MONGODB_URL -w $WHITELIST -k $APIKEY
