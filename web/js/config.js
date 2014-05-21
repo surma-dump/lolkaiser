@@ -13,25 +13,25 @@ angular.module('lolkaiser').constant('CONFIG', {
 		{
 			name: 'Ranked Solo 5v5',
 			f: function(m) {
-				return m.game_type == 'Ranked Solo 5v5';
+				return m.subType == 'RANKED_SOLO_5x5';
 			}
 		},
 		{
 			name: 'Normal 5v5',
 			f: function(m) {
-				return m.game_type == 'Normal 5v5';
+				return m.subType == 'NORMAL';
 			}
 		},
 		{
 			name: 'Team Builder',
 			f: function(m) {
-				return m.game_type == 'Team Builder';
+				return m.subType == 'CAP_5x5';
 			}
 		},
 		{
 			name: 'Co-Op Vs AI',
 			f: function(m) {
-				return m.game_type == 'Co-Op Vs AI';
+				return m.subType == 'BOT';
 			}
 		}
 	],
@@ -41,24 +41,6 @@ angular.module('lolkaiser').constant('CONFIG', {
 			f: function(matches) {
 				return matches.slice(0, 100);
 			}
-		},
-		{
-			name: 'After start of Season 3',
-			f: function(matches) {
-				return [for(m of matches) if(m.timestamp > '2013-02-01T00:00:00Z') m];
-			}
-		},
-		{
-			name: 'Before start of Season 4',
-			f: function(matches) {
-				return [for(m of matches) if(m.timestamp < '2014-01-17T00:00:00Z') m];
-			}
-		},
-		{
-			name: 'After start of Season 4',
-			f: function(matches) {
-				return [for(m of matches) if(m.timestamp > '2014-01-17T00:00:00Z') m];
-			}
 		}
 	],
 	mappings: [
@@ -67,13 +49,13 @@ angular.module('lolkaiser').constant('CONFIG', {
 			f: function(data) {
 				var sliceWidth = 20;
 				var champions = new Set();
-				data.forEach(e => champions.add(e.champion))
+				data.forEach(e => champions.add(e.championId))
 				data = data
 					.map(function(e, i, c) {
 						return c.slice(i, i+sliceWidth);
 					})
 					.map(function(e) {
-						return _(e).countBy('champion').__wrapped__;
+						return _(e).countBy('championId').__wrapped__;
 					});
 
 				result = [];
@@ -103,17 +85,17 @@ angular.module('lolkaiser').constant('CONFIG', {
 							key: 'Win rate per Champion',
 							values: _(data)
 								.reduce(function(acc, e){
-									var idx = _(acc).findIndex({'champion': e.champion});
+									var idx = _(acc).findIndex({'champion': e.championId});
 									if(idx == -1) {
 										idx = acc.push({
-											champion: e.champion,
+											champion: e.championId,
 											wins: 0,
 											losses: 0,
 											games: 0
 										})-1;
 									}
 									acc[idx].games += 1;
-									acc[idx][e.win ? 'wins' : 'losses'] += 1;
+									acc[idx][e.stats.win ? 'wins' : 'losses'] += 1;
 									return acc;
 								}, [])
 								.map(function(e) {
@@ -143,7 +125,7 @@ angular.module('lolkaiser').constant('CONFIG', {
 								.filter(e => e.length == sliceWidth)
 								.map(function(e) {
 									return e
-										.filter(e => e.win)
+										.filter(e => e.stats.win)
 										.length/sliceWidth;
 								})
 								.map(function(e, i) {

@@ -151,7 +151,7 @@ func queryMatchHistory(w http.ResponseWriter, r *http.Request) {
 	c := db.C(fmt.Sprintf("%s-%d", server, summonerId))
 
 	var mh []Game
-	if err := c.Find(bson.M{}).Sort("-timestamp").All(&mh); err != nil {
+	if err := c.Find(bson.M{}).Sort("-createDate").All(&mh); err != nil {
 		log.Printf("Query failed: %s", err)
 		http.Error(w, "Query failed", http.StatusInternalServerError)
 		return
