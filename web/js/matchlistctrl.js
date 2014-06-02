@@ -1,4 +1,4 @@
-angular.module('lolkaiser').controller('MatchListCtrl', ['$scope', 'matchHistory', 'SERVERS', 'GAMETYPES', 'TIMEPOINTS', 'MAPPINGS', function($scope, matchHistory, SERVERS, GAMETYPES, TIMEPOINTS, MAPPINGS) {
+angular.module('lolkaiser').controller('MatchListCtrl', ['$scope', 'matchHistory', 'SERVERS', 'GAMETYPES', 'TIMEPOINTS', 'MAPPINGS', 'CHAMPIONSLUT', function($scope, matchHistory, SERVERS, GAMETYPES, TIMEPOINTS, MAPPINGS, CHAMPIONSLUT) {
 	$scope.history = [];
 	$scope.gametypes = GAMETYPES;
 	$scope.timepoints = TIMEPOINTS;
@@ -57,6 +57,11 @@ angular.module('lolkaiser').controller('MatchListCtrl', ['$scope', 'matchHistory
 		$scope.selections.timepoints
 			.filter(e => e.selected)
 			.forEach(e => {data = e.f(data)});
+
+		data.map(e => {
+			e.championId = CHAMPIONSLUT[e.championId];
+			return e;
+		});
 
 		$scope.chart = $scope.selections.mapping.f(data);
 	};
