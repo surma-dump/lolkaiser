@@ -22,5 +22,5 @@ angular.module('lolkaiser').factory('matchHistory', ['$q', '$http', function($q,
 				return true;
 			});
 		}
-	};	
+	};
 }]);

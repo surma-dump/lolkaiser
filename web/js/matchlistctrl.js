@@ -1,17 +1,20 @@
-angular.module('lolkaiser').controller('MatchListCtrl', ['$scope', 'matchHistory', 'CONFIG', function($scope, matchHistory, CONFIG) {
+angular.module('lolkaiser').controller('MatchListCtrl', ['$scope', 'matchHistory', 'SERVERS', 'GAMETYPES', 'TIMEPOINTS', 'MAPPINGS', function($scope, matchHistory, SERVERS, GAMETYPES, TIMEPOINTS, MAPPINGS) {
 	$scope.history = [];
-	$scope.config = CONFIG;
-	CONFIG.gametypes[0].selected = true;
-	CONFIG.timepoints[0].selected = true;
+	$scope.gametypes = GAMETYPES;
+	$scope.timepoints = TIMEPOINTS;
+	$scope.servers = SERVERS;
+	$scope.mappings = MAPPINGS;
+	$scope.gametypes[0].selected = true;
+	$scope.timepoints[0].selected = true;
 	$scope.selections = {
-		mapping: CONFIG.mappings[0],
-		gametypes: CONFIG.gametypes,
-		timepoints: CONFIG.timepoints
+		mapping: $scope.mappings[0],
+		gametypes: $scope.gametypes,
+		timepoints: $scope.timepoints
 	};
 
 
 	$scope.summoner = {
-		server: CONFIG.servers[0].id,
+		server: $scope.servers[0].id,
 		isValid: false,
 	};
 

@@ -22,7 +22,7 @@ module.exports = function(grunt) {
       traceur: {
         src: [
           '.tmp/traceur/js/lolkaiser.js',
-          '.tmp/traceur/js/config.js',
+          '.tmp/traceur/js/const_*.js',
           '.tmp/traceur/js/matchhistory.js',
           '.tmp/traceur/js/matchlistctrl.js'
         ],
