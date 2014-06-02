@@ -22,7 +22,7 @@ module.exports = function(grunt) {
       traceur: {
         src: [
           '.tmp/traceur/js/lolkaiser.js',
-          '.tmp/traceur/js/config.js',
+          '.tmp/traceur/js/const_*.js',
           '.tmp/traceur/js/matchhistory.js',
           '.tmp/traceur/js/matchlistctrl.js'
         ],
@@ -148,6 +148,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build', ['traceur', 'concat', 'uglify', 'cssmin', 'copy:html', 'copy:css', 'copy:js']);
   grunt.registerTask('dev', ['traceur', 'concat', 'copy:html', 'copy:tmpcss', 'copy:tmpjs']);
+  grunt.registerTask('server', ['dev', 'watch']);
   grunt.registerTask('heroku', ['build']);
   grunt.registerTask('default', ['build']);
 };

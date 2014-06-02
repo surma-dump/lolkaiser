@@ -35,6 +35,10 @@ var (
 	db *mgo.Database
 )
 
+func init() {
+	goriot.BaseURL = "http://euw.api.pvp.net/api"
+}
+
 func main() {
 	goptions.ParseAndFail(&options)
 
@@ -126,7 +130,7 @@ func saveMatchHistory(w http.ResponseWriter, r *http.Request) {
 
 	for _, m := range mh {
 		_, err := c.Upsert(bson.M{
-			"timestamp": m.CreateDate,
+			"createdate": m.CreateDate,
 		}, m)
 		if err != nil {
 			log.Printf("Update failed: %s", err)
@@ -151,7 +155,7 @@ func queryMatchHistory(w http.ResponseWriter, r *http.Request) {
 	c := db.C(fmt.Sprintf("%s-%d", server, summonerId))
 
 	var mh []Game
-	if err := c.Find(bson.M{}).Sort("-createDate").All(&mh); err != nil {
+	if err := c.Find(bson.M{}).Sort("-createdate").All(&mh); err != nil {
 		log.Printf("Query failed: %s", err)
 		http.Error(w, "Query failed", http.StatusInternalServerError)
 		return
