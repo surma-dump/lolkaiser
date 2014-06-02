@@ -5,7 +5,7 @@
 	</head>
 	<body ng-controller="MatchListCtrl">
 		<form>
-			<select ng-model="summoner.server" ng-options="server.id as server.name for server in config.servers">
+			<select ng-model="summoner.server" ng-options="server.id as server.name for server in servers">
 			</select>
 			<input ng-model="summoner.id" placeholder="Summoner ID"/>
 			<button ng-click="loadClick()">Load</button>
@@ -13,16 +13,16 @@
 		</form>
 		<div ng-show="summoner.isValid">
 			<div>
-				<label ng-repeat="gametype in config.gametypes">
+				<label ng-repeat="gametype in gametypes">
 					<input type="checkbox" ng-model="selections.gametypes[$index].selected" /> {{gametype.name}}
 				</label>
 			</div>
 			<div>
-				<label ng-repeat="timepoint in config.timepoints">
+				<label ng-repeat="timepoint in timepoints">
 					<input type="checkbox" ng-model="selections.timepoints[$index].selected" /> {{timepoint.name}}
 				</label>
 			</div>
-			<select ng-model="selections.mapping" ng-options="mapping as mapping.name for mapping in config.mappings">
+			<select ng-model="selections.mapping" ng-options="mapping as mapping.name for mapping in mappings">
 			</select>
 			<nvd3-multi-bar-horizontal-chart
 				ng-if="chart.type == 'horizontal-bar'"
