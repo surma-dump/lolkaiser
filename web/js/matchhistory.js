@@ -1,4 +1,4 @@
-angular.module('lolkaiser').factory('matchHistory', ['$q', '$http', function($q, $http) {
+angular.module('lolkaiser').factory('matchHistory', ['$q', '$http', 'RIOTSTATIC', function($q, $http, RIOTSTATIC) {
 	return {
 		get: function(server, summonerId) {
 			return $http({
@@ -8,7 +8,11 @@ angular.module('lolkaiser').factory('matchHistory', ['$q', '$http', function($q,
 				if(result.status != 200) {
 					return $q.reject(result.data);
 				}
-				return result.data;
+
+				return result.data.map(e => {
+					e.championName = RIOTSTATIC.data[e.championId].name;
+					return e;
+				});
 			});
 		},
 		update: function(server, summonerId) {

@@ -4,13 +4,13 @@ angular.module('lolkaiser').constant('MAPPINGS', [
 		f: function(data) {
 			var sliceWidth = 20;
 			var champions = new Set();
-			data.forEach(e => champions.add(e.championId))
+			data.forEach(e => champions.add(e.championName))
 			data = data
 				.map(function(e, i, c) {
 					return c.slice(i, i+sliceWidth);
 				})
 				.map(function(e) {
-					return _(e).countBy('championId').__wrapped__;
+					return _(e).countBy('championName').__wrapped__;
 				});
 
 			result = [];
@@ -43,7 +43,7 @@ angular.module('lolkaiser').constant('MAPPINGS', [
 								var idx = _(acc).findIndex({'champion': e.championId});
 								if(idx == -1) {
 									idx = acc.push({
-										champion: e.championId,
+										champion: e.championName,
 										wins: 0,
 										losses: 0,
 										games: 0
