@@ -40,7 +40,7 @@ angular.module('lolkaiser').constant('MAPPINGS', [
 						key: 'Win rate per Champion',
 						values: _(data)
 							.reduce(function(acc, e){
-								var idx = _(acc).findIndex({'champion': e.championId});
+								var idx = _(acc).findIndex({'champion': e.championName});
 								if(idx == -1) {
 									idx = acc.push({
 										champion: e.championName,
